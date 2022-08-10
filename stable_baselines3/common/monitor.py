@@ -10,6 +10,7 @@ from typing import Dict, List, Optional, Tuple, Union
 import gym
 import numpy as np
 import pandas
+import nasim
 
 from stable_baselines3.common.type_aliases import GymObs, GymStepReturn
 
@@ -100,6 +101,7 @@ class Monitor(gym.Wrapper):
             self.episode_lengths.append(ep_len)
             self.episode_times.append(time.time() - self.t_start)
             ep_info.update(self.current_reset_info)
+            self.env = nasim.generate(num_hosts=3, num_services=8, fully_obs=True, flat_actions=False)
             if self.results_writer:
                 self.results_writer.write_row(ep_info)
             info["episode"] = ep_info
