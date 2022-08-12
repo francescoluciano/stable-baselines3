@@ -89,6 +89,8 @@ class BaseAlgorithm(ABC):
         self,
         policy: Type[BasePolicy],
         env: Union[GymEnv, str, None],
+        num_hosts: int,
+        num_services: int,
         learning_rate: Union[float, Schedule],
         policy_kwargs: Optional[Dict[str, Any]] = None,
         tensorboard_log: Optional[str] = None,
@@ -152,6 +154,8 @@ class BaseAlgorithm(ABC):
         self._logger = None  # type: Logger
         # Whether the user passed a custom logger or not
         self._custom_logger = False
+        self.num_hosts = num_hosts
+        self.num_services =  num_services
 
         # Create and wrap the env if needed
         if env is not None:
@@ -160,7 +164,7 @@ class BaseAlgorithm(ABC):
                     self.eval_env = maybe_make_env(env, self.verbose)
 
             env = maybe_make_env(env, self.verbose)
-            env = self._wrap_env(env, self.verbose, monitor_wrapper)
+            env = self._wrap_env(env, num_hosts, num_services, self.verbose, monitor_wrapper,)
 
             self.observation_space = env.observation_space
             self.action_space = env.action_space
@@ -191,7 +195,7 @@ class BaseAlgorithm(ABC):
                 ), "Continuous action space must have a finite lower and upper bound"
 
     @staticmethod
-    def _wrap_env(env: GymEnv, verbose: int = 0, monitor_wrapper: bool = True) -> VecEnv:
+    def _wrap_env(env: GymEnv, num_hosts: int, num_services: int, verbose: int = 0, monitor_wrapper: bool = True,) -> VecEnv:
         """ "
         Wrap environment with the appropriate wrappers if needed.
         For instance, to have a vectorized environment
@@ -206,7 +210,7 @@ class BaseAlgorithm(ABC):
             if not is_wrapped(env, Monitor) and monitor_wrapper:
                 if verbose >= 1:
                     print("Wrapping the env with a `Monitor` wrapper")
-                env = Monitor(env)
+                env = Monitor(env, num_hosts, num_services)
             if verbose >= 1:
                 print("Wrapping the env in a DummyVecEnv.")
             env = DummyVecEnv([lambda: env])

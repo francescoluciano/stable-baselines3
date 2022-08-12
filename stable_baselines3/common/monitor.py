@@ -10,7 +10,9 @@ from typing import Dict, List, Optional, Tuple, Union
 import gym
 import numpy as np
 import pandas
-import nasim
+
+import random #FL
+import nasim #FL
 
 from stable_baselines3.common.type_aliases import GymObs, GymStepReturn
 
@@ -32,6 +34,8 @@ class Monitor(gym.Wrapper):
     def __init__(
         self,
         env: gym.Env,
+        num_hosts: int,
+        num_services: int,
         filename: Optional[str] = None,
         allow_early_resets: bool = True,
         reset_keywords: Tuple[str, ...] = (),
@@ -57,6 +61,8 @@ class Monitor(gym.Wrapper):
         self.episode_times = []
         self.total_steps = 0
         self.current_reset_info = {}  # extra info about the current episode, that was passed in during reset()
+        self.num_hosts = num_hosts
+        self.num_services = num_services
 
     def reset(self, **kwargs) -> GymObs:
         """
@@ -101,10 +107,10 @@ class Monitor(gym.Wrapper):
             self.episode_lengths.append(ep_len)
             self.episode_times.append(time.time() - self.t_start)
             ep_info.update(self.current_reset_info)
-            self.env = nasim.generate(num_hosts=3, num_services=8, fully_obs=True, flat_actions=False)
             if self.results_writer:
                 self.results_writer.write_row(ep_info)
             info["episode"] = ep_info
+            self.env = nasim.generate(num_hosts=self.num_hosts, num_services=self.num_services, fully_obs=True, flat_actions=False)
         self.total_steps += 1
         return observation, reward, done, info
 

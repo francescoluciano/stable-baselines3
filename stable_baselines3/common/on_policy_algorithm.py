@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional, Tuple, Type, Union
 import gym
 import numpy as np
 import torch as th
+import nasim
 
 from stable_baselines3.common.base_class import BaseAlgorithm
 from stable_baselines3.common.buffers import DictRolloutBuffer, RolloutBuffer
@@ -52,6 +53,8 @@ class OnPolicyAlgorithm(BaseAlgorithm):
         self,
         policy: Union[str, Type[ActorCriticPolicy]],
         env: Union[GymEnv, str],
+        num_hosts: int,
+        num_services: int,
         learning_rate: Union[float, Schedule],
         n_steps: int,
         gamma: float,
@@ -75,6 +78,8 @@ class OnPolicyAlgorithm(BaseAlgorithm):
         super().__init__(
             policy=policy,
             env=env,
+            num_hosts=num_hosts,
+            num_services=num_services,
             learning_rate=learning_rate,
             policy_kwargs=policy_kwargs,
             verbose=verbose,
@@ -146,6 +151,10 @@ class OnPolicyAlgorithm(BaseAlgorithm):
         assert self._last_obs is not None, "No previous observation was provided"
         # Switch to eval mode (this affects batch norm / dropout)
         self.policy.set_training_mode(False)
+
+        # self.env = nasim.generate(num_hosts=3, num_services=3, fully_obs=True, flat_actions=False) #FL
+        # self.env = Monitor(env)
+        # self.env = DummyVecEnv([lambda: env])
 
         n_steps = 0
         rollout_buffer.reset()
