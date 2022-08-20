@@ -671,6 +671,8 @@ class BaseAlgorithm(ABC):
         cls,
         path: Union[str, pathlib.Path, io.BufferedIOBase],
         env: Optional[GymEnv] = None,
+        num_hosts: Optional[int] = 0,       #FL
+        num_services: Optional[int] = 0,    #FL
         device: Union[th.device, str] = "auto",
         custom_objects: Optional[Dict[str, Any]] = None,
         print_system_info: bool = False,
@@ -741,6 +743,8 @@ class BaseAlgorithm(ABC):
         model = cls(  # pytype: disable=not-instantiable,wrong-keyword-args
             policy=data["policy_class"],
             env=env,
+            num_hosts=num_hosts,
+            num_services=num_services,
             device=device,
             _init_setup_model=False,  # pytype: disable=not-instantiable,wrong-keyword-args
         )
